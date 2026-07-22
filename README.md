@@ -18,6 +18,8 @@ Generated projects include:
 - make
 - git
 - cargo-generate 0.23+
+- for `app_type=ncurses`: ncurses development package
+- for `app_type=imgui`: GLFW development package and Vulkan loader development package (`-lvulkan`)
 
 ## Usage
 
@@ -44,6 +46,12 @@ Generate an ImGui variant:
 ```sh
 cargo generate --git https://github.com/efvincent/cpp-template.git --name my-cpp26-imgui --define project_description='imgui app' --define app_type='imgui' template
 ```
+
+The ImGui variant uses a real GLFW + Vulkan backend. On first build it bootstraps:
+- `third_party/imgui`
+- `third_party/Vulkan-Headers`
+
+If link fails with `cannot find -lvulkan`, install your distro Vulkan loader development package.
 
 Then in the generated project:
 
