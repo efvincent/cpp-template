@@ -23,7 +23,7 @@ Generated projects include:
 Generate a project from this repository payload folder:
 
 ```sh
-cargo generate --git https://github.com/efvincent/project-template.git --subfolder template --name my-cpp26-app
+cargo generate --git https://github.com/efvincent/cpp-template.git --subfolder template --name my-cpp26-app
 ```
 
 Generate from a local checkout while iterating:
