@@ -1,0 +1,16 @@
+{
+  "files.associations": {
+    "*.cppm": "cpp"
+  },
+  "C_Cpp.files.associations": {
+    "*.cppm": "cpp"
+  },
+  "clangd.arguments": [
+    "--compile-commands-dir=${workspaceFolder}",
+    "--background-index",
+    "--header-insertion=never",
+    "--completion-style=detailed",
+    "--clang-tidy"
+  ],
+  "makefile.configureOnOpen": false
+}

@@ -1,0 +1,22 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build-debug",
+      "type": "shell",
+      "command": "make debug",
+      "isBackground": false,
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "build-release",
+      "type": "shell",
+      "command": "make release",
+      "isBackground": false,
+      "group": "build"
+    }
+  ]
+}
