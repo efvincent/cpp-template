@@ -23,13 +23,13 @@ Generated projects include:
 Generate a project from this repository payload folder:
 
 ```sh
-cargo generate --git https://github.com/efvincent/cpp-template.git --subfolder template --name my-cpp26-app
+cargo generate --git https://github.com/efvincent/cpp-template.git --name my-cpp26-app --define project_description='My C++26 app' template
 ```
 
 Generate from a local checkout while iterating:
 
 ```sh
-cargo generate --path ./template --name my-cpp26-app
+cargo generate --path ./template --name my-cpp26-app --define project_description='My C++26 app'
 ```
 
 Then in the generated project:
