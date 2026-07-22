@@ -3,6 +3,7 @@
 MODE ?= debug
 
 PROJECT_NAME := {{project-name}}
+APP_TYPE := {{app_type}}
 
 # Directory configuration
 SRC_DIR   := src
@@ -25,6 +26,16 @@ COMPDB_FILE := compile_commands.json
 CXX := clang++
 
 BASE_FLAGS := -std=c++26 -fno-exceptions -fno-rtti -Wall -Wextra -Wpedantic -I./$(CORE_SRC_DIR)
+UI_LIBS :=
+EXTRA_CPP_SRCS :=
+
+ifeq ($(APP_TYPE),ncurses)
+	UI_LIBS := $(shell pkg-config --libs ncurses 2>/dev/null || echo -lncurses)
+else ifeq ($(APP_TYPE),imgui)
+	IMGUI_DIR := third_party/imgui
+	BASE_FLAGS += -I./$(IMGUI_DIR)
+	EXTRA_CPP_SRCS := $(shell [ -d $(IMGUI_DIR) ] && find $(IMGUI_DIR) -maxdepth 1 -type f -name 'imgui*.cpp' | sort || true)
+endif
 
 ifeq ($(MODE), release)
 	CXXFLAGS := $(BASE_FLAGS) -O3 -march=native -DNDEBUG
@@ -44,6 +55,7 @@ MJFLAGS   = $(if $(GENERATE_COMPDB),-MJ $(COMPDB_DIR)/$(subst /,_,$(patsubst $(O
 APP_CPPM_SRCS := $(shell find $(SRC_DIR) -type f -name '*.cppm' | sort)
 CORE_CPPM_SRCS := $(shell [ -d $(CORE_SRC_DIR) ] && find $(CORE_SRC_DIR) -type f -name '*.cppm' | sort || true)
 CPP_SRCS := $(shell find $(SRC_DIR) -type f -name '*.cpp' | sort)
+CPP_SRCS += $(EXTRA_CPP_SRCS)
 
 MODULE_SRCS := $(APP_CPPM_SRCS) $(CORE_CPPM_SRCS)
 
@@ -63,9 +75,9 @@ module_import_obj_deps = $(strip $(foreach m,$(call imports_of_src,$(1)),$(call 
 
 $(foreach src,$(MODULE_SRCS),$(eval $(call module_obj_from_src,$(src)): $(call module_import_obj_deps,$(src))))
 
-.PHONY: all debug release lto instrument do-build clean clean_all bear init-submodule verify-submodule-pin
+.PHONY: all debug release lto instrument do-build clean clean_all bear init-submodule init-ui-deps verify-submodule-pin
 
-all: init-submodule
+all: init-submodule init-ui-deps
 	@$(MAKE) MODE=$(MODE) do-build
 
 do-build: $(TARGET)
@@ -85,10 +97,13 @@ instrument:
 init-submodule:
 	@sh ci/init_cpp_core_submodule.sh
 
+init-ui-deps:
+	@if [ "$(APP_TYPE)" = "imgui" ]; then sh ci/init_imgui.sh; fi
+
 verify-submodule-pin:
 	@sh ci/verify_cpp_core_submodule.sh
 
-bear: init-submodule
+bear: init-submodule init-ui-deps
 	@$(RM) $(COMPDB_FILE)
 	@$(RM) $(BUILD_DIR)
 	@$(MKDIR) $(COMPDB_DIR)
@@ -98,7 +113,7 @@ bear: init-submodule
 
 $(TARGET): $(ALL_OBJS)
 	@$(MKDIR) build
-	$(CXX) $(CXXFLAGS) $(ALL_OBJS) -o $(TARGET)
+	$(CXX) $(CXXFLAGS) $(ALL_OBJS) -o $(TARGET) $(UI_LIBS)
 
 $(OBJ_DIR)/%.o: %.cppm
 	@$(MKDIR) $(dir $(MOD_DIR)/$*.pcm) $(@D) $(if $(GENERATE_COMPDB),$(COMPDB_DIR))

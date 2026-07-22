@@ -10,6 +10,7 @@ Generated projects include:
 - Build modes: debug, release, lto, instrument
 - `make bear` support that emits `compile_commands.json` via clang `-MJ` fragments
 - Submodule setup and pin verification scripts for `third_party/cpp-core`
+- App modes: `plain`, `ncurses`, `imgui`
 
 ## Prerequisites
 
@@ -23,13 +24,25 @@ Generated projects include:
 Generate a project from this repository payload folder:
 
 ```sh
-cargo generate --git https://github.com/efvincent/cpp-template.git --name my-cpp26-app --define project_description='My C++26 app' template
+cargo generate --git https://github.com/efvincent/cpp-template.git --name my-cpp26-app --define project_description='My C++26 app' --define app_type='plain' template
 ```
 
 Generate from a local checkout while iterating:
 
 ```sh
-cargo generate --path ./template --name my-cpp26-app --define project_description='My C++26 app'
+cargo generate --path ./template --name my-cpp26-app --define project_description='My C++26 app' --define app_type='plain'
+```
+
+Generate an ncurses variant:
+
+```sh
+cargo generate --git https://github.com/efvincent/cpp-template.git --name my-cpp26-ncurses --define project_description='ncurses app' --define app_type='ncurses' template
+```
+
+Generate an ImGui variant:
+
+```sh
+cargo generate --git https://github.com/efvincent/cpp-template.git --name my-cpp26-imgui --define project_description='imgui app' --define app_type='imgui' template
 ```
 
 Then in the generated project:
@@ -47,7 +60,7 @@ make verify-submodule-pin
 
 This repository keeps template payload files in `template/`.
 
-Use `--subfolder template` for git-based generation or `--path ./template` for local generation. That ensures repository-level files like this README, CONTRIBUTING, and LICENSE are not copied into generated projects.
+Use the positional `template` subfolder argument for git-based generation or `--path ./template` for local generation. That ensures repository-level files like this README, CONTRIBUTING, and LICENSE are not copied into generated projects.
 
 ## Repository layout
 

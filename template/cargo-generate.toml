@@ -4,3 +4,4 @@ ignore = ["build", "compile_commands.json"]
 
 [placeholders]
 project_description = { type = "string", prompt = "Project description", default = "C++26 module project using cpp-core" }
+app_type = { type = "string", prompt = "App type", choices = ["plain", "ncurses", "imgui"], default = "plain" }
