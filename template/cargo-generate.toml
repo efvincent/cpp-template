@@ -1,0 +1,6 @@
+[template]
+cargo_generate_version = ">=0.23.0"
+ignore = ["build", "compile_commands.json"]
+
+[placeholders]
+project_description = { type = "string", prompt = "Project description", default = "C++26 module project using cpp-core" }
