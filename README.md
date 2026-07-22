@@ -9,7 +9,8 @@ Generated projects include:
 - Dynamic module discovery for both project modules and cpp-core modules
 - Build modes: debug, release, lto, instrument
 - `make bear` support that emits `compile_commands.json` via clang `-MJ` fragments
-- Submodule setup and pin verification scripts for `third_party/cpp-core`
+- Submodule setup scripts for `third_party/cpp-core`, `third_party/imgui`, and `third_party/Vulkan-Headers`
+- Pinned dependency bootstrap for reproducible ImGui and Vulkan builds
 - UI types: `plain`, `ncurses`, `imgui`
 - ImGui backends: `glfw_vulkan`, `glfw_opengl3`
 
@@ -56,12 +57,14 @@ Generate an ImGui OpenGL3 variant:
 cargo generate --git https://github.com/efvincent/cpp-template.git --name my-cpp26-imgui-gl --define project_description='imgui app' --define ui_type='imgui' --define imgui_backend='glfw_opengl3' template
 ```
 
-The ImGui Vulkan variant uses a real GLFW + Vulkan backend. On first build it bootstraps:
-- `third_party/imgui`
-- `third_party/Vulkan-Headers`
+The ImGui Vulkan variant uses a real GLFW + Vulkan backend. On first build it bootstraps pinned submodules:
+- `third_party/imgui` pinned to `v1.92.8`
+- `third_party/Vulkan-Headers` pinned to `vulkan-sdk-1.4.350.1`
 
-The ImGui OpenGL3 variant bootstraps:
-- `third_party/imgui`
+The ImGui OpenGL3 variant bootstraps a pinned submodule:
+- `third_party/imgui` pinned to `v1.92.8`
+
+The bootstrap scripts stage submodule gitlinks at these pinned versions so the generated project can commit deterministic dependency pointers.
 
 If link fails with `cannot find -lvulkan`, install your distro Vulkan loader development package.
 
