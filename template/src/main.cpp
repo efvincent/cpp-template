@@ -33,6 +33,14 @@ int main() {
   io.DisplaySize = ImVec2(640.0f, 480.0f);
   io.DeltaTime = 1.0f / 60.0f;
 
+  // No platform/renderer backend is initialized in this template variant,
+  // so bake the default font atlas explicitly before NewFrame().
+  io.Fonts->AddFontDefault();
+  unsigned char* font_pixels = nullptr;
+  int font_width = 0;
+  int font_height = 0;
+  io.Fonts->GetTexDataAsRGBA32(&font_pixels, &font_width, &font_height);
+
   ImGui::NewFrame();
   ImGui::Begin("Hello");
   ImGui::Text("Hello from {{project-name}} (ImGui)");
