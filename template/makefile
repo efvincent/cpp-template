@@ -3,7 +3,8 @@
 MODE ?= debug
 
 PROJECT_NAME := {{project-name}}
-APP_TYPE := {{app_type}}
+UI_TYPE := {{ui_type}}
+IMGUI_BACKEND := {{imgui_backend}}
 
 # Directory configuration
 SRC_DIR   := src
@@ -29,20 +30,27 @@ BASE_FLAGS := -std=c++26 -fno-exceptions -fno-rtti -Wall -Wextra -Wpedantic -I./
 UI_LIBS :=
 EXTRA_CPP_SRCS :=
 
-ifeq ($(APP_TYPE),ncurses)
+ifeq ($(UI_TYPE),ncurses)
 	UI_LIBS := $(shell pkg-config --libs ncurses 2>/dev/null || echo -lncurses)
-else ifeq ($(APP_TYPE),imgui)
+else ifeq ($(UI_TYPE),imgui)
 	IMGUI_DIR := third_party/imgui
-	VULKAN_HEADERS_DIR := third_party/Vulkan-Headers/include
 	GLFW_CFLAGS := $(shell pkg-config --cflags glfw3 2>/dev/null || echo "")
-	VULKAN_CFLAGS := $(shell pkg-config --cflags vulkan 2>/dev/null || echo "")
 	GLFW_LIBS := $(shell pkg-config --libs glfw3 2>/dev/null || echo -lglfw)
-	VULKAN_LIBS := $(shell pkg-config --libs vulkan 2>/dev/null || echo -lvulkan)
-	BASE_FLAGS += -I./$(IMGUI_DIR) -I./$(VULKAN_HEADERS_DIR) $(GLFW_CFLAGS) $(VULKAN_CFLAGS)
-	UI_LIBS := $(GLFW_LIBS) $(VULKAN_LIBS) -ldl -lpthread
+	BASE_FLAGS += -I./$(IMGUI_DIR) $(GLFW_CFLAGS)
 	EXTRA_CPP_SRCS := $(shell [ -d $(IMGUI_DIR) ] && find $(IMGUI_DIR) -maxdepth 1 -type f -name 'imgui*.cpp' | sort || true)
 	EXTRA_CPP_SRCS += $(shell [ -f $(IMGUI_DIR)/backends/imgui_impl_glfw.cpp ] && printf '%s\n' $(IMGUI_DIR)/backends/imgui_impl_glfw.cpp || true)
-	EXTRA_CPP_SRCS += $(shell [ -f $(IMGUI_DIR)/backends/imgui_impl_vulkan.cpp ] && printf '%s\n' $(IMGUI_DIR)/backends/imgui_impl_vulkan.cpp || true)
+	ifeq ($(IMGUI_BACKEND),glfw_vulkan)
+		VULKAN_HEADERS_DIR := third_party/Vulkan-Headers/include
+		VULKAN_CFLAGS := $(shell pkg-config --cflags vulkan 2>/dev/null || echo "")
+		VULKAN_LIBS := $(shell pkg-config --libs vulkan 2>/dev/null || echo -lvulkan)
+		BASE_FLAGS += -I./$(VULKAN_HEADERS_DIR) $(VULKAN_CFLAGS)
+		UI_LIBS := $(GLFW_LIBS) $(VULKAN_LIBS) -ldl -lpthread
+		EXTRA_CPP_SRCS += $(shell [ -f $(IMGUI_DIR)/backends/imgui_impl_vulkan.cpp ] && printf '%s\n' $(IMGUI_DIR)/backends/imgui_impl_vulkan.cpp || true)
+	else ifeq ($(IMGUI_BACKEND),glfw_opengl3)
+		OPENGL_LIBS := $(shell pkg-config --libs gl 2>/dev/null || echo -lGL)
+		UI_LIBS := $(GLFW_LIBS) $(OPENGL_LIBS) -ldl
+		EXTRA_CPP_SRCS += $(shell [ -f $(IMGUI_DIR)/backends/imgui_impl_opengl3.cpp ] && printf '%s\n' $(IMGUI_DIR)/backends/imgui_impl_opengl3.cpp || true)
+	endif
 endif
 
 ifeq ($(MODE), release)
@@ -106,7 +114,10 @@ init-submodule:
 	@sh ci/init_cpp_core_submodule.sh
 
 init-ui-deps:
-	@if [ "$(APP_TYPE)" = "imgui" ]; then sh ci/init_imgui.sh; sh ci/init_vulkan_headers.sh; fi
+	@if [ "$(UI_TYPE)" = "imgui" ]; then \
+		sh ci/init_imgui.sh; \
+		if [ "$(IMGUI_BACKEND)" = "glfw_vulkan" ]; then sh ci/init_vulkan_headers.sh; fi; \
+	fi
 
 verify-submodule-pin:
 	@sh ci/verify_cpp_core_submodule.sh

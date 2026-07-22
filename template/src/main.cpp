@@ -1,10 +1,11 @@
-{% if app_type == "plain" %}
-import app;
+{% if ui_type == "plain" %}
+#include <stdio.h>
 
 int main() {
-  return app::run();
+  puts("hello from {{project-name}}");
+  return 0;
 }
-{% elsif app_type == "ncurses" %}
+{% elsif ui_type == "ncurses" %}
 #include <ncurses.h>
 
 int main() {
@@ -21,7 +22,7 @@ int main() {
   endwin();
   return 0;
 }
-{% elsif app_type == "imgui" %}
+{% elsif ui_type == "imgui" and imgui_backend == "glfw_vulkan" %}
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -322,6 +323,31 @@ int main() {
   glfwGetFramebufferSize(window, &width, &height);
   ImGui_ImplVulkanH_Window* wd = &g_main_window_data;
   wd->Surface = g_surface;
+  const VkFormat request_surface_image_format[] = {
+    VK_FORMAT_B8G8R8A8_UNORM,
+    VK_FORMAT_R8G8B8A8_UNORM,
+    VK_FORMAT_B8G8R8_UNORM,
+    VK_FORMAT_R8G8B8_UNORM
+  };
+  const VkColorSpaceKHR request_surface_color_space = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
+  wd->SurfaceFormat = ImGui_ImplVulkanH_SelectSurfaceFormat(
+    g_physical_device,
+    wd->Surface,
+    request_surface_image_format,
+    static_cast<int>(sizeof(request_surface_image_format) / sizeof(request_surface_image_format[0])),
+    request_surface_color_space
+  );
+  const VkPresentModeKHR request_present_modes[] = {
+    VK_PRESENT_MODE_MAILBOX_KHR,
+    VK_PRESENT_MODE_IMMEDIATE_KHR,
+    VK_PRESENT_MODE_FIFO_KHR
+  };
+  wd->PresentMode = ImGui_ImplVulkanH_SelectPresentMode(
+    g_physical_device,
+    wd->Surface,
+    &request_present_modes[0],
+    static_cast<int>(sizeof(request_present_modes) / sizeof(request_present_modes[0]))
+  );
   ImGui_ImplVulkanH_CreateOrResizeWindow(
     g_instance,
     g_physical_device,
@@ -408,6 +434,82 @@ int main() {
   vkDestroyDevice(g_device, g_allocator);
   vkDestroySurfaceKHR(g_instance, g_surface, g_allocator);
   vkDestroyInstance(g_instance, g_allocator);
+
+  glfwDestroyWindow(window);
+  glfwTerminate();
+  return 0;
+}
+{% elsif ui_type == "imgui" and imgui_backend == "glfw_opengl3" %}
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <GLFW/glfw3.h>
+
+#include "imgui.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
+
+int main() {
+  if (!glfwInit()) {
+    fprintf(stderr, "Failed to initialize GLFW.\n");
+    return 1;
+  }
+
+#if defined(__APPLE__)
+  const char* glsl_version = "#version 150";
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#else
+  const char* glsl_version = "#version 130";
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+#endif
+
+  GLFWwindow* window = glfwCreateWindow(1280, 720, "{{project-name}} (ImGui + OpenGL3)", nullptr, nullptr);
+  if (window == nullptr) {
+    fprintf(stderr, "Failed to create GLFW window.\n");
+    glfwTerminate();
+    return 1;
+  }
+
+  glfwMakeContextCurrent(window);
+  glfwSwapInterval(1);
+
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImGui::StyleColorsDark();
+
+  ImGui_ImplGlfw_InitForOpenGL(window, true);
+  ImGui_ImplOpenGL3_Init(glsl_version);
+
+  while (!glfwWindowShouldClose(window)) {
+    glfwPollEvents();
+
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    ImGui::Begin("Hello");
+    ImGui::Text("Hello from {{project-name}} (ImGui + OpenGL3)");
+    ImGui::Text("Press close on the window to exit.");
+    ImGui::End();
+
+    ImGui::Render();
+    int display_w = 0;
+    int display_h = 0;
+    glfwGetFramebufferSize(window, &display_w, &display_h);
+    glViewport(0, 0, display_w, display_h);
+    glClearColor(0.10f, 0.10f, 0.10f, 1.00f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    glfwSwapBuffers(window);
+  }
+
+  ImGui_ImplOpenGL3_Shutdown();
+  ImGui_ImplGlfw_Shutdown();
+  ImGui::DestroyContext();
 
   glfwDestroyWindow(window);
   glfwTerminate();

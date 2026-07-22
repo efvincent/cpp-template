@@ -4,4 +4,5 @@ ignore = ["build", "compile_commands.json"]
 
 [placeholders]
 project_description = { type = "string", prompt = "Project description", default = "C++26 module project using cpp-core" }
-app_type = { type = "string", prompt = "App type", choices = ["plain", "ncurses", "imgui"], default = "plain" }
+ui_type = { type = "string", prompt = "UI type", choices = ["plain", "ncurses", "imgui"], default = "plain" }
+imgui_backend = { type = "string", prompt = "ImGui backend (used only when ui_type=imgui)", choices = ["glfw_vulkan", "glfw_opengl3"], default = "glfw_vulkan" }
