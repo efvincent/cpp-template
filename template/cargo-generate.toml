@@ -2,7 +2,15 @@
 cargo_generate_version = ">=0.23.0"
 ignore = ["build", "compile_commands.json"]
 
+[hooks]
+post = ["ci/post_gen_cleanup.rhai"]
+
 [placeholders]
 project_description = { type = "string", prompt = "Project description", default = "C++26 module project using cpp-core" }
 ui_type = { type = "string", prompt = "UI type", choices = ["plain", "ncurses", "imgui"], default = "plain" }
-imgui_backend = { type = "string", prompt = "ImGui backend (used only when ui_type=imgui)", choices = ["glfw_vulkan", "glfw_opengl3"], default = "glfw_vulkan" }
+
+[conditional.'ui_type == "imgui"'.placeholders]
+imgui_backend = { type = "string", prompt = "ImGui backend", choices = ["glfw_vulkan", "glfw_opengl3"], default = "glfw_vulkan" }
+
+[conditional.'ui_type != "imgui"']
+ignore = ["ci/init_imgui.sh", "ci/init_vulkan_headers.sh"]

@@ -1,9 +1,13 @@
 [submodule "third_party/cpp-core"]
 	path = third_party/cpp-core
 	url = https://github.com/efvincent/cpp-core.git
+{% if ui_type == "imgui" %}
 [submodule "third_party/imgui"]
 	path = third_party/imgui
 	url = https://github.com/ocornut/imgui.git
+{% if imgui_backend == "glfw_vulkan" %}
 [submodule "third_party/Vulkan-Headers"]
 	path = third_party/Vulkan-Headers
 	url = https://github.com/KhronosGroup/Vulkan-Headers.git
+{% endif %}
+{% endif %}

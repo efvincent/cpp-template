@@ -30,19 +30,19 @@ Generated projects include:
 Generate a project from this repository payload folder:
 
 ```sh
-cargo generate --git https://github.com/efvincent/cpp-template.git --name my-cpp26-app --define project_description='My C++26 app' --define ui_type='plain' --define imgui_backend='glfw_vulkan' template
+cargo generate --git https://github.com/efvincent/cpp-template.git --name my-cpp26-app --define project_description='My C++26 app' --define ui_type='plain' template
 ```
 
 Generate from a local checkout while iterating:
 
 ```sh
-cargo generate --path ./template --name my-cpp26-app --define project_description='My C++26 app' --define ui_type='plain' --define imgui_backend='glfw_vulkan'
+cargo generate --path ./template --name my-cpp26-app --define project_description='My C++26 app' --define ui_type='plain'
 ```
 
 Generate an ncurses variant:
 
 ```sh
-cargo generate --git https://github.com/efvincent/cpp-template.git --name my-cpp26-ncurses --define project_description='ncurses app' --define ui_type='ncurses' --define imgui_backend='glfw_vulkan' template
+cargo generate --git https://github.com/efvincent/cpp-template.git --name my-cpp26-ncurses --define project_description='ncurses app' --define ui_type='ncurses' template
 ```
 
 Generate an ImGui Vulkan variant:
