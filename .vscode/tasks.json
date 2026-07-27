@@ -1,0 +1,90 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "local-validate-all-variants",
+			"type": "shell",
+			"command": "set -euo pipefail\ncd /home/efvincent/code/cpp/project-template\nrm -rf /tmp/smoke-plain /tmp/smoke-ncurses /tmp/smoke-sdl3 /tmp/smoke-imgui-vk /tmp/smoke-imgui-gl\ncargo generate --path ./template --name smoke-plain --define project_description='smoke' --define ui_type='plain' --silent --destination /tmp\ncargo generate --path ./template --name smoke-ncurses --define project_description='smoke' --define ui_type='ncurses' --silent --destination /tmp\ncargo generate --path ./template --name smoke-sdl3 --define project_description='smoke' --define ui_type='sdl3' --silent --destination /tmp\ncargo generate --path ./template --name smoke-imgui-vk --define project_description='smoke' --define ui_type='imgui' --define imgui_backend='glfw_vulkan' --silent --destination /tmp\ncargo generate --path ./template --name smoke-imgui-gl --define project_description='smoke' --define ui_type='imgui' --define imgui_backend='glfw_opengl3' --silent --destination /tmp\nfor p in /tmp/smoke-plain /tmp/smoke-ncurses /tmp/smoke-sdl3 /tmp/smoke-imgui-vk /tmp/smoke-imgui-gl; do\n  (cd \"$p\" && make -j2 && make bear && test -f compile_commands.json)\ndone\necho \"ALL_LOCAL_VALIDATION_PASSED\""
+		},
+		{
+			"label": "retest-smoke-imgui-gl",
+			"type": "shell",
+			"command": "set -euo pipefail\nrm -rf /tmp/smoke-imgui-gl\ncd /home/efvincent/code/cpp/project-template\ncargo generate --path ./template --name smoke-imgui-gl --define project_description='smoke' --define ui_type='imgui' --define imgui_backend='glfw_opengl3' --silent --destination /tmp\ncd /tmp/smoke-imgui-gl\nmake -j2\nmake bear\ntest -f compile_commands.json\necho \"SMOKE_IMGUI_GL_OK\""
+		},
+		{
+			"label": "local-validate-all-variants-clean-rerun",
+			"type": "shell",
+			"command": "set -euo pipefail\ncd /home/efvincent/code/cpp/project-template\nrm -rf /tmp/smoke-plain /tmp/smoke-ncurses /tmp/smoke-sdl3 /tmp/smoke-imgui-vk /tmp/smoke-imgui-gl\ncargo generate --path ./template --name smoke-plain --define project_description='smoke' --define ui_type='plain' --silent --destination /tmp\ncargo generate --path ./template --name smoke-ncurses --define project_description='smoke' --define ui_type='ncurses' --silent --destination /tmp\ncargo generate --path ./template --name smoke-sdl3 --define project_description='smoke' --define ui_type='sdl3' --silent --destination /tmp\ncargo generate --path ./template --name smoke-imgui-vk --define project_description='smoke' --define ui_type='imgui' --define imgui_backend='glfw_vulkan' --silent --destination /tmp\ncargo generate --path ./template --name smoke-imgui-gl --define project_description='smoke' --define ui_type='imgui' --define imgui_backend='glfw_opengl3' --silent --destination /tmp\nfor p in /tmp/smoke-plain /tmp/smoke-ncurses /tmp/smoke-sdl3 /tmp/smoke-imgui-vk /tmp/smoke-imgui-gl; do\n  (cd \"$p\" && make -j2 && make bear && test -f compile_commands.json)\ndone\necho \"ALL_LOCAL_VALIDATION_PASSED\""
+		},
+		{
+			"label": "git-status-branch-check",
+			"type": "shell",
+			"command": "set -euo pipefail\ncd /home/efvincent/code/cpp/project-template\necho \"BRANCH=$(git branch --show-current)\"\ngit status --short\ngit status --short --branch"
+		},
+		{
+			"label": "commit-scoped-phase3-docs",
+			"type": "shell",
+			"command": "set -euo pipefail\ncd /home/efvincent/code/cpp/project-template\ngit add README.md CONTRIBUTING.md .github/workflows/template-smoke.yml\nif ! git diff --cached --quiet; then\n  git commit -m \"docs: defer hosted CI smoke and enforce local validation gate\"\nelse\n  echo \"NO_STAGED_CHANGES\"\nfi\ngit status --short --branch"
+		},
+		{
+			"label": "push-branch-and-read-pr",
+			"type": "shell",
+			"command": "set -euo pipefail\ncd /home/efvincent/code/cpp/project-template\ngit push origin phase-3-ci-smoke-matrix\ngh pr view --json number,title,url,body,headRefName,baseRefName"
+		},
+		{
+			"label": "update-pr3-scope-and-body",
+			"type": "shell",
+			"command": "set -euo pipefail\ncat > /tmp/pr3-body.md <<'EOF'\n## Summary\nThis phase has been re-scoped to prioritize local validation and defer hosted CI integration for SDL/UI variants.\n\n## What Changed\n- Removed GitHub Actions smoke workflow:\n  - `.github/workflows/template-smoke.yml` deleted\n- Updated contributor policy in `CONTRIBUTING.md`:\n  - local full-matrix validation is required before push\n  - hosted SDL/UI CI is deferred as a future enhancement\n- Updated `README.md`:\n  - removed CI matrix coverage claims\n  - added future-enhancement note about reintroducing hosted CI once dependency installation is reliable\n\n## Local Validation Performed\nExecuted clean generation + build validation for all 5 variants from this branch state:\n1. `plain`\n2. `ncurses`\n3. `sdl3`\n4. `imgui` + `glfw_vulkan`\n5. `imgui` + `glfw_opengl3`\n\nFor each generated project:\n- `make -j2` passed\n- `make bear` passed\n- `compile_commands.json` exists\n\nFinal validation marker observed:\n- `ALL_LOCAL_VALIDATION_PASSED`\n\n## Why This Direction\n- Keeps developer feedback loop reliable on known local environments.\n- Avoids blocking on unstable hosted package setup for SDL/UI deps.\n- Preserves a clear path to add hosted CI later once dependency setup is robust.\n\n## Future Enhancement\n- Reintroduce hosted CI smoke checks for all variants after SDL/UI dependency installation is stable on runners.\nEOF\n\ncd /home/efvincent/code/cpp/project-template\ngh pr edit 3 --title \"Phase 3: Defer hosted CI and require local validation\" --body-file /tmp/pr3-body.md\ngh pr view 3 --json number,title,url,body"
+		},
+		{
+			"label": "sync-main-and-scan-state",
+			"type": "shell",
+			"command": "set -euo pipefail\ncd /home/efvincent/code/cpp/project-template\necho \"BEFORE_BRANCH=$(git branch --show-current)\"\ngit status --short --branch\ngit fetch origin --prune\ngit checkout main\ngit pull --ff-only origin main\necho \"AFTER_BRANCH=$(git branch --show-current)\"\ngit log --oneline -n 5\ngit status --short --branch"
+		},
+		{
+			"label": "start-phase4-local-validation-automation",
+			"type": "shell",
+			"command": "set -euo pipefail\ncd /home/efvincent/code/cpp/project-template\ngit switch -c phase-4-local-validation-automation\ngit status --short --branch"
+		},
+		{
+			"label": "phase4-chmod-and-status",
+			"type": "shell",
+			"command": "set -euo pipefail\ncd /home/efvincent/code/cpp/project-template\nchmod +x ci/local_validate_matrix.sh\ngit status --short --branch"
+		},
+		{
+			"label": "phase4-run-local-validation-script",
+			"type": "shell",
+			"command": "set -euo pipefail\ncd /home/efvincent/code/cpp/project-template\nsh ci/local_validate_matrix.sh"
+		},
+		{
+			"label": "phase4-git-status",
+			"type": "shell",
+			"command": "cd /home/efvincent/code/cpp/project-template && git --no-pager status --short --branch"
+		},
+		{
+			"label": "phase4-check-commit-status",
+			"type": "shell",
+			"command": "cd /home/efvincent/code/cpp/project-template && git --no-pager log --oneline -n 1 && echo '---' && git --no-pager status --short --branch"
+		},
+		{
+			"label": "phase4-stage-and-commit",
+			"type": "shell",
+			"command": "set -euo pipefail\ncd /home/efvincent/code/cpp/project-template\ngit add CONTRIBUTING.md README.md ci/local_validate_matrix.sh\ngit commit -m \"Add one-command local matrix validation helper\""
+		},
+		{
+			"label": "phase4-push-branch",
+			"type": "shell",
+			"command": "cd /home/efvincent/code/cpp/project-template && git push -u origin phase-4-local-validation-automation"
+		},
+		{
+			"label": "phase4-create-pr",
+			"type": "shell",
+			"command": "set -euo pipefail\ncd /home/efvincent/code/cpp/project-template\nTITLE_FILE=\"/tmp/phase4_pr_title.txt\"\nBODY_FILE=\"/tmp/phase4_pr_body.md\"\ncat > \"$TITLE_FILE\" <<'EOF'\nAdd one-command local template validation workflow\nEOF\ncat > \"$BODY_FILE\" <<'EOF'\n## Summary\nThis PR adds a single-command local validation helper for template contributors and updates contributor-facing docs to use that command as the default pre-push gate.\n\n## Why\nAfter Phase 3, project policy is local-first validation before pushing and hosted SDL/UI smoke CI is deferred. Running the full matrix manually is reliable but repetitive, so this PR improves ergonomics while preserving the same validation standard.\n\n## What changed\n- Added `ci/local_validate_matrix.sh` at the repository root.\n- Updated `CONTRIBUTING.md` to make the script the primary checklist command.\n- Updated `README.md` repository layout to document the new helper script.\n\n## Validation behavior of the new script\n- Generates all five template variants under a temporary root.\n- Runs `make -j2` for each generated variant.\n- Runs `make bear` and verifies `compile_commands.json` exists for each variant.\n- Emits `ALL_LOCAL_VALIDATION_PASSED` only after all variants pass.\n- Cleans up temporary artifacts via trap by default.\n- Supports `KEEP_SMOKE=1` to retain generated projects for debugging.\n\n## Local verification performed\nExecuted on this branch before pushing:\n\n`sh ci/local_validate_matrix.sh`\n\nObserved terminal success marker:\n\n`ALL_LOCAL_VALIDATION_PASSED`\n\n## Scope and non-goals\n- No generated template runtime behavior changed.\n- No hosted CI workflow added or modified.\n- Hosted SDL/UI CI remains a future enhancement per current project policy.\nEOF\ngh pr create -B main -H phase-4-local-validation-automation -t \"$(cat \"$TITLE_FILE\")\" -F \"$BODY_FILE\""
+		},
+		{
+			"label": "sync-main-and-verify-phase-state",
+			"type": "shell",
+			"command": "set -euo pipefail\ncd /home/efvincent/code/cpp/project-template\ngit switch main\ngit pull --ff-only origin main\necho '---'\ngit --no-pager log --oneline -n 5\necho '---'\ngit --no-pager status --short --branch"
+		}
+	]
+}
