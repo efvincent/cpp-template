@@ -14,3 +14,6 @@ imgui_backend = { type = "string", prompt = "ImGui backend", choices = ["glfw_vu
 
 [conditional.'ui_type != "imgui"']
 ignore = ["ci/init_imgui.sh", "ci/init_vulkan_headers.sh"]
+
+[conditional.'ui_type != "sdl3"']
+ignore = ["ci/init_sdl3.sh"]

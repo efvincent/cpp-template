@@ -122,6 +122,8 @@ init-ui-deps:
 	@if [ "$(UI_TYPE)" = "imgui" ]; then \
 		sh ci/init_imgui.sh; \
 		if [ "$(IMGUI_BACKEND)" = "glfw_vulkan" ]; then sh ci/init_vulkan_headers.sh; fi; \
+	elif [ "$(UI_TYPE)" = "sdl3" ]; then \
+		sh ci/init_sdl3.sh; \
 	fi
 
 verify-submodule-pin:

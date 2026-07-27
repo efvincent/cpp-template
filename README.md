@@ -26,6 +26,8 @@ Generated projects include:
 - for `ui_type=imgui` and `imgui_backend=glfw_opengl3`: desktop OpenGL development package (`-lGL` on Linux)
 - for `ui_type=sdl3`: SDL3 development package discoverable via `pkg-config` as `sdl3`
 
+For `ui_type=sdl3`, `make` runs a pre-build dependency check via `ci/init_sdl3.sh` and stops early with distro-specific installation hints when SDL3 is missing.
+
 ## Usage
 
 Generate a project from this repository payload folder:
@@ -76,6 +78,7 @@ The bootstrap scripts stage submodule gitlinks at these pinned versions so the g
 If link fails with `cannot find -lvulkan`, install your distro Vulkan loader development package.
 
 If SDL3 configure/link fails, install your distro SDL3 development package and ensure `pkg-config --libs sdl3` succeeds.
+If SDL3 dependency checks fail before build, run `sh ci/init_sdl3.sh` in the generated project for diagnostics.
 
 Then in the generated project:
 
