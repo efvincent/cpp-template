@@ -14,16 +14,24 @@ Thanks for contributing.
 Run these checks from this repository root:
 
 ```sh
-cargo generate --path . --name smoke-template --destination /tmp
-cd /tmp/smoke-template
-make debug
-make bear
+cargo generate --path ./template --name smoke-plain --define project_description='smoke' --define ui_type='plain' --destination /tmp
+cargo generate --path ./template --name smoke-ncurses --define project_description='smoke' --define ui_type='ncurses' --destination /tmp
+cargo generate --path ./template --name smoke-sdl3 --define project_description='smoke' --define ui_type='sdl3' --destination /tmp
+cargo generate --path ./template --name smoke-imgui-vk --define project_description='smoke' --define ui_type='imgui' --define imgui_backend='glfw_vulkan' --destination /tmp
+cargo generate --path ./template --name smoke-imgui-gl --define project_description='smoke' --define ui_type='imgui' --define imgui_backend='glfw_opengl3' --destination /tmp
+
+for p in /tmp/smoke-plain /tmp/smoke-ncurses /tmp/smoke-sdl3 /tmp/smoke-imgui-vk /tmp/smoke-imgui-gl; do
+	(cd "$p" && make && make bear)
+done
 ```
 
 Expected results:
-- build succeeds
-- `compile_commands.json` exists
+- all variant builds succeed
+- `compile_commands.json` exists in each generated project
 - `third_party/cpp-core` initializes automatically on first build
+
+CI note:
+GitHub Actions runs the same matrix smoke coverage in `.github/workflows/template-smoke.yml`.
 
 ## Scope rules
 

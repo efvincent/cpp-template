@@ -103,3 +103,14 @@ Use the positional `template` subfolder argument for git-based generation or `--
 - `template/`: files that are copied into generated projects
 - `CONTRIBUTING.md`: contribution workflow for this template repository
 - `LICENSE`: MIT license for this template repository
+
+## CI coverage
+
+GitHub Actions smoke-tests template generation and build for:
+- `plain`
+- `ncurses`
+- `sdl3`
+- `imgui` + `glfw_vulkan`
+- `imgui` + `glfw_opengl3`
+
+Workflow: `.github/workflows/template-smoke.yml`
