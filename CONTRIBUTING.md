@@ -6,8 +6,9 @@ Thanks for contributing.
 
 1. Create a branch for your change.
 2. Edit template payload files under `template/`.
-3. If you change template behavior, regenerate a smoke project and build it.
-4. Open a pull request with a short rationale and test evidence.
+3. If you change template behavior, run the full local validation checklist below.
+4. Push your branch only after all local validation checks pass.
+5. Open a pull request with a short rationale and local test evidence.
 
 ## Validation checklist
 
@@ -30,8 +31,14 @@ Expected results:
 - `compile_commands.json` exists in each generated project
 - `third_party/cpp-core` initializes automatically on first build
 
-CI note:
-GitHub Actions runs the same matrix smoke coverage in `.github/workflows/template-smoke.yml`.
+Policy note:
+- local validation is the merge gate for now
+- SDL CI integration is deferred to a future enhancement
+
+## Future enhancements
+
+- add GitHub Actions smoke coverage once SDL dependency setup is robust on hosted runners
+- when CI is added, keep local validation as a mandatory pre-push check
 
 ## Scope rules
 

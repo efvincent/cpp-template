@@ -104,13 +104,7 @@ Use the positional `template` subfolder argument for git-based generation or `--
 - `CONTRIBUTING.md`: contribution workflow for this template repository
 - `LICENSE`: MIT license for this template repository
 
-## CI coverage
+## Future enhancements
 
-GitHub Actions smoke-tests template generation and build for:
-- `plain`
-- `ncurses`
-- `sdl3`
-- `imgui` + `glfw_vulkan`
-- `imgui` + `glfw_opengl3`
-
-Workflow: `.github/workflows/template-smoke.yml`
+- Add hosted CI smoke coverage for all UI variants after SDL dependency installation is made reliable on hosted runners.
+- Keep local matrix validation as the required pre-push quality gate.
