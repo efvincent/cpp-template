@@ -7,7 +7,7 @@ post = ["ci/post_gen_cleanup.rhai"]
 
 [placeholders]
 project_description = { type = "string", prompt = "Project description", default = "C++26 module project using cpp-core" }
-ui_type = { type = "string", prompt = "UI type", choices = ["plain", "ncurses", "imgui"], default = "plain" }
+ui_type = { type = "string", prompt = "UI type", choices = ["plain", "ncurses", "imgui", "sdl3"], default = "plain" }
 
 [conditional.'ui_type == "imgui"'.placeholders]
 imgui_backend = { type = "string", prompt = "ImGui backend", choices = ["glfw_vulkan", "glfw_opengl3"], default = "glfw_vulkan" }

@@ -32,6 +32,11 @@ EXTRA_CPP_SRCS :=
 
 ifeq ($(UI_TYPE),ncurses)
 	UI_LIBS := $(shell pkg-config --libs ncurses 2>/dev/null || echo -lncurses)
+else ifeq ($(UI_TYPE),sdl3)
+	SDL3_CFLAGS := $(shell pkg-config --cflags sdl3 2>/dev/null || echo "")
+	SDL3_LIBS := $(shell pkg-config --libs sdl3 2>/dev/null || echo -lSDL3)
+	BASE_FLAGS += $(SDL3_CFLAGS)
+	UI_LIBS := $(SDL3_LIBS)
 else ifeq ($(UI_TYPE),imgui)
 	IMGUI_DIR := third_party/imgui
 	GLFW_CFLAGS := $(shell pkg-config --cflags glfw3 2>/dev/null || echo "")
