@@ -103,3 +103,8 @@ Use the positional `template` subfolder argument for git-based generation or `--
 - `template/`: files that are copied into generated projects
 - `CONTRIBUTING.md`: contribution workflow for this template repository
 - `LICENSE`: MIT license for this template repository
+
+## Future enhancements
+
+- Add hosted CI smoke coverage for all UI variants after SDL dependency installation is made reliable on hosted runners.
+- Keep local matrix validation as the required pre-push quality gate.
