@@ -12,7 +12,19 @@ Thanks for contributing.
 
 ## Validation checklist
 
-Run these checks from this repository root:
+Run this from the repository root:
+
+```sh
+sh ci/local_validate_matrix.sh
+```
+
+If you want to inspect generated smoke projects after the run:
+
+```sh
+KEEP_SMOKE=1 sh ci/local_validate_matrix.sh
+```
+
+Manual equivalent (fallback) commands:
 
 ```sh
 cargo generate --path ./template --name smoke-plain --define project_description='smoke' --define ui_type='plain' --destination /tmp

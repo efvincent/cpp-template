@@ -100,6 +100,7 @@ Use the positional `template` subfolder argument for git-based generation or `--
 ## Repository layout
 
 - `cargo-generate.toml`: cargo-generate config and placeholders
+- `ci/local_validate_matrix.sh`: repository local validation helper for all template variants
 - `template/`: files that are copied into generated projects
 - `CONTRIBUTING.md`: contribution workflow for this template repository
 - `LICENSE`: MIT license for this template repository
