@@ -11,7 +11,7 @@ Generated projects include:
 - `make bear` support that emits `compile_commands.json` via clang `-MJ` fragments
 - Submodule setup scripts for `third_party/cpp-core`, `third_party/imgui`, and `third_party/Vulkan-Headers`
 - Pinned dependency bootstrap for reproducible ImGui and Vulkan builds
-- UI types: `plain`, `ncurses`, `imgui`
+- UI types: `plain`, `ncurses`, `imgui`, `sdl3`
 - ImGui backends: `glfw_vulkan`, `glfw_opengl3`
 
 ## Prerequisites
@@ -24,6 +24,7 @@ Generated projects include:
 - for `ui_type=imgui`: GLFW development package
 - for `ui_type=imgui` and `imgui_backend=glfw_vulkan`: Vulkan loader development package (`-lvulkan`)
 - for `ui_type=imgui` and `imgui_backend=glfw_opengl3`: desktop OpenGL development package (`-lGL` on Linux)
+- for `ui_type=sdl3`: SDL3 development package discoverable via `pkg-config` as `sdl3`
 
 ## Usage
 
@@ -57,6 +58,12 @@ Generate an ImGui OpenGL3 variant:
 cargo generate --git https://github.com/efvincent/cpp-template.git --name my-cpp26-imgui-gl --define project_description='imgui app' --define ui_type='imgui' --define imgui_backend='glfw_opengl3' template
 ```
 
+Generate an SDL3 variant:
+
+```sh
+cargo generate --git https://github.com/efvincent/cpp-template.git --name my-cpp26-sdl3 --define project_description='sdl3 app' --define ui_type='sdl3' template
+```
+
 The ImGui Vulkan variant uses a real GLFW + Vulkan backend. On first build it bootstraps pinned submodules:
 - `third_party/imgui` pinned to `v1.92.8`
 - `third_party/Vulkan-Headers` pinned to `vulkan-sdk-1.4.350.1`
@@ -67,6 +74,8 @@ The ImGui OpenGL3 variant bootstraps a pinned submodule:
 The bootstrap scripts stage submodule gitlinks at these pinned versions so the generated project can commit deterministic dependency pointers.
 
 If link fails with `cannot find -lvulkan`, install your distro Vulkan loader development package.
+
+If SDL3 configure/link fails, install your distro SDL3 development package and ensure `pkg-config --libs sdl3` succeeds.
 
 Then in the generated project:
 
